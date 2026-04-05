@@ -1,6 +1,6 @@
 # Hanwha Vision Camera MCP Server
 
-[![npm](https://img.shields.io/npm/v/hanwha-mcp)](https://www.npmjs.com/package/hanwha-mcp)
+[![npm](https://img.shields.io/npm/v/@hemla/hanwha-mcp)](https://www.npmjs.com/package/@hemla/hanwha-mcp)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 
 MCP server for configuring [Hanwha Vision](https://hanwhavision.com) (Wisenet) IP cameras. Connects via SUNAPI and exposes tools for device info, live snapshots, image tuning, overlays, OSD, NTP, network, and system management.
@@ -16,7 +16,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "hanwha-camera": {
       "command": "npx",
-      "args": ["-y", "hanwha-mcp"]
+      "args": ["-y", "@hemla/hanwha-mcp"]
     }
   }
 }
@@ -31,7 +31,7 @@ Add to `.vscode/mcp.json` in your workspace:
   "servers": {
     "hanwha-camera": {
       "command": "npx",
-      "args": ["-y", "hanwha-mcp"]
+      "args": ["-y", "@hemla/hanwha-mcp"]
     }
   }
 }
