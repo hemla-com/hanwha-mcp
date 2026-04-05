@@ -1,0 +1,75 @@
+# Hanwha Vision Camera MCP Server
+
+> This file provides context for LLMs interacting with the hanwha-mcp server.
+
+## What this server does
+
+This MCP server connects to Hanwha Vision (Wisenet) IP cameras and exposes their SUNAPI configuration interface as MCP tools. It enables reading and writing camera settings over HTTP.
+
+## Connection workflow
+
+You MUST call `connect_camera` with host, username, and password before using any other tool. All subsequent tools operate on the connected camera. Only one camera connection is active at a time — calling `connect_camera` again switches to the new camera.
+
+## Tool categories
+
+### Read-only tools (safe, no side effects)
+- `get_device_info` — model, serial, firmware, MAC, video profiles
+- `get_snapshot` — live JPEG image (default resized to 1280px wide)
+- `get_image_settings` — brightness, sharpness, white balance, exposure, SSDR, flip, IR
+- `get_overlay` — title/time overlay configuration
+- `get_osd_list` — multiline on-screen display entries
+- `get_datetime` — time, timezone, DST, NTP servers
+- `get_network_info` — MAC, link status, DNS
+- `get_logs` — system/access/event logs
+
+### Write tools (modify camera settings, idempotent)
+- `set_image_settings` — brightness (0-100), sharpness, gamma, saturation (0-100)
+- `set_flip` — horizontalFlip (bool), verticalFlip (bool), rotate (Off/90/180/270)
+- `set_ir_led` — mode (Auto/Off/On)
+- `set_focus` — mode (SimpleAutoFocus/ManualFocus)
+- `set_overlay` — title text, time format, font size, positions
+- `set_osd` — add/update OSD entry by index (1-8) with type, text, color, size, position
+- `set_ntp` — comma-separated NTP server list
+- `set_datetime` — manual date/time (disables NTP)
+
+### Destructive tools (use with caution)
+- `remove_osd` — permanently deletes an OSD entry by index
+- `reboot_camera` — reboots the camera (~60 second downtime)
+
+## Parameter conventions
+
+- `channel` defaults to 0 on all tools. Multi-channel cameras (e.g. multi-sensor) use channels 0, 1, 2, etc.
+- Boolean values on the camera use the strings "True" and "False" but tool inputs accept native booleans.
+- Position values (X/Y) range from 0-9 representing grid positions.
+- Font sizes are: Small, Medium, Large.
+- OSD colors: White, Red, Blue, Green, Yellow, Cyan, Magenta, Black.
+
+## Common workflows
+
+### Inspect a camera
+1. `connect_camera` → 2. `get_device_info` → 3. `get_image_settings` → 4. `get_snapshot`
+
+### Add a text overlay
+1. `connect_camera` → 2. `set_overlay` with titleEnable=true, title="Building A - Lobby" → 3. `get_snapshot` to verify
+
+### Add custom OSD text
+1. `connect_camera` → 2. `set_osd` with index=1, enable=true, osdType="Text", text="RESTRICTED AREA", osdColor="Red", fontSize="Large" → 3. `get_snapshot` to verify
+
+### Configure NTP
+1. `connect_camera` → 2. `set_ntp` with servers="pool.ntp.org,time.nist.gov" → 3. `get_datetime` to confirm
+
+## Error handling
+
+All tools return structured errors via `isError: true` in the MCP response. Common errors:
+- "No camera connected" — call `connect_camera` first
+- "SUNAPI ... failed: 401" — wrong credentials
+- "SUNAPI ... failed: 404" — camera doesn't support that feature
+- "Camera returned error: NG..." — camera-side error with error code
+
+## SUNAPI protocol notes
+
+- Endpoint pattern: `http://{host}/stw-cgi/{module}.cgi?msubmenu={sub}&action={action}`
+- Auth: HTTP Digest
+- Responses: `text/plain` with `Key=Value` lines
+- Snapshots: raw JPEG bytes from `video.cgi?msubmenu=snapshot&action=view`
+- Not all cameras support all endpoints. The server returns errors gracefully for unsupported features.
