@@ -1,6 +1,9 @@
 # Hanwha Vision Camera MCP Server
 
-MCP server for configuring [Hanwha Vision](https://hanwhavision.com) (Wisenet) IP cameras. Connects via SUNAPI and exposes 20 tools for device info, live snapshots, image tuning, overlays, OSD, NTP, network, and more.
+[![npm](https://img.shields.io/npm/v/hanwha-mcp)](https://www.npmjs.com/package/hanwha-mcp)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
+
+MCP server for configuring [Hanwha Vision](https://hanwhavision.com) (Wisenet) IP cameras. Connects via SUNAPI and exposes tools for device info, live snapshots, image tuning, overlays, OSD, NTP, network, and system management.
 
 ## Install
 
@@ -54,27 +57,54 @@ Then interact naturally:
 
 ## Tools
 
-| Tool | Description |
-|---|---|
-| `connect_camera` | Connect to a camera (required first) |
-| `get_device_info` | Model, serial, firmware, video profiles |
-| `get_snapshot` | Live JPEG snapshot (auto-resized) |
-| `get_image_settings` | Brightness, sharpness, white balance, exposure, SSDR, flip, IR |
-| `set_image_settings` | Adjust brightness, sharpness, gamma, saturation |
-| `set_flip` | Horizontal/vertical flip, rotation |
-| `set_ir_led` | IR LED mode (Auto/Off/On) |
-| `set_focus` | Focus mode (Auto/Manual) |
-| `get_overlay` | Title and time overlay settings |
-| `set_overlay` | Configure title text, time format, font |
-| `get_osd_list` | List multiline OSD entries |
-| `set_osd` | Add/update OSD entry (text, color, position) |
-| `remove_osd` | Delete an OSD entry |
-| `get_datetime` | Time, timezone, DST, NTP config |
-| `set_ntp` | Configure NTP servers |
-| `set_datetime` | Set time manually |
-| `get_network_info` | MAC, link status, DNS |
-| `get_logs` | System, access, or event logs |
-| `reboot_camera` | Reboot the camera |
+### Connection
+
+| Tool | Description | Parameters |
+|---|---|---|
+| `connect_camera` | Connect to a camera (required first) | `host` (string), `username` (string), `password` (string), `port?` (number, default 80) |
+
+### Device & Snapshots
+
+| Tool | Description | Parameters |
+|---|---|---|
+| `get_device_info` | Model, serial, firmware, video profiles | — |
+| `get_snapshot` | Live JPEG snapshot (auto-resized) | `channel?` (number), `profile?` (number), `maxWidth?` (number, default 1280) |
+
+### Image Settings
+
+| Tool | Description | Parameters |
+|---|---|---|
+| `get_image_settings` | Brightness, sharpness, white balance, exposure, SSDR, flip, IR | `channel?` (number) |
+| `set_image_settings` | Adjust brightness, sharpness, gamma, saturation | `channel?` (number), `brightness?` (0-100), `sharpness?`, `gamma?`, `saturation?` (0-100) |
+| `set_flip` | Image flip and rotation | `channel?` (number), `horizontalFlip?` (bool), `verticalFlip?` (bool), `rotate?` (Off/90/180/270) |
+| `set_ir_led` | IR LED mode | `channel?` (number), `mode` (Auto/Off/On) |
+| `set_focus` | Focus mode | `channel?` (number), `mode` (SimpleAutoFocus/ManualFocus) |
+
+### Overlays & OSD
+
+| Tool | Description | Parameters |
+|---|---|---|
+| `get_overlay` | Title and time overlay settings | `channel?` (number) |
+| `set_overlay` | Configure title text, time format, font | `channel?`, `titleEnable?` (bool), `title?` (string), `titlePositionX?` (0-9), `titlePositionY?` (0-9), `timeEnable?` (bool), `timeFormat?`, `weekdayEnable?` (bool), `fontSize?` (Small/Medium/Large) |
+| `get_osd_list` | List multiline OSD entries | `channel?` (number) |
+| `set_osd` | Add/update OSD entry | `channel?`, `index` (1-8), `enable?` (bool), `osdType?` (Text/Date/Time), `text?`, `positionX?` (0-9), `positionY?` (0-9), `fontSize?`, `osdColor?`, `transparency?` |
+| `remove_osd` | Delete an OSD entry | `channel?` (number), `index` (number) |
+
+### Date, Time & NTP
+
+| Tool | Description | Parameters |
+|---|---|---|
+| `get_datetime` | Time, timezone, DST, NTP config | — |
+| `set_ntp` | Configure NTP servers | `servers` (comma-separated, e.g. "pool.ntp.org,time.nist.gov") |
+| `set_datetime` | Set time manually (disables NTP) | `year`, `month` (1-12), `day` (1-31), `hour` (0-23), `minute` (0-59), `second?` (0-59) |
+
+### Network & System
+
+| Tool | Description | Parameters |
+|---|---|---|
+| `get_network_info` | MAC, link status, DNS | — |
+| `get_logs` | System, access, or event logs | `type` (system/access/event) |
+| `reboot_camera` | Reboot the camera | — |
 
 All read-only tools are annotated for automatic approval. Write tools are marked as non-destructive and idempotent. Only `reboot_camera` and `remove_osd` require confirmation.
 
