@@ -11,10 +11,19 @@ import { getOverlay, setOverlay, getOsdList, setOsd, removeOsd } from "./tools/o
 import { getDateTime, setNtp, setDateTime } from "./tools/datetime.js";
 import { getNetworkInfo } from "./tools/network.js";
 import { rebootCamera, getLogs, setFocus } from "./tools/system.js";
+import { getVideoProfiles, setVideoProfile, addVideoProfile, removeVideoProfile } from "./tools/video-profile.js";
+import { getWhiteBalance, setWhiteBalance } from "./tools/white-balance.js";
+import { getSsdr, setSsdr } from "./tools/ssdr.js";
+import { getPrivacyMask, setPrivacyMask } from "./tools/privacy-mask.js";
+import { getTamperingDetection, setTamperingDetection, getDefocusDetection, setDefocusDetection } from "./tools/event-detection.js";
+import { getEventRules, setEventRule } from "./tools/event-rules.js";
+import { getUsers } from "./tools/users.js";
+import { getStorageConfig, setStorageConfig } from "./tools/storage.js";
+import { getNetworkConfig, setNetworkConfig } from "./tools/network-config.js";
 
 const server = new McpServer({
   name: "hanwha-camera",
-  version: "0.2.0",
+  version: "0.3.0",
 });
 
 function toolError(err: unknown) {
@@ -319,6 +328,270 @@ server.registerTool("set_focus", {
     const result = await setFocus(args);
     return { content: [{ type: "text", text: result }] };
   } catch (err) { return toolError(err); }
+});
+
+// ── Video Profiles ──────────────────────────────────────────────
+
+server.registerTool("get_video_profiles", {
+  description: "Get all video profiles with encoding, resolution, FPS, bitrate, and codec settings.",
+  inputSchema: { channel: z.number().optional().default(0).describe("Camera channel (default 0)") },
+  annotations: READ_ONLY,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await getVideoProfiles(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_video_profile", {
+  description: "Update a video profile's encoding, resolution, FPS, bitrate, or codec settings.",
+  inputSchema: {
+    channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
+    profile: z.number().describe("Profile number to update"),
+    name: z.string().optional().describe("Profile name"),
+    encodingType: z.string().optional().describe("Encoding type (H264, H265, MJPEG)"),
+    resolution: z.string().optional().describe("Resolution (e.g. 2560x1440)"),
+    frameRate: z.number().optional().describe("Frame rate"),
+    bitrate: z.number().optional().describe("Bitrate in kbps"),
+    bitrateControlType: z.string().optional().describe("Bitrate control (CBR, VBR)"),
+    govLength: z.number().optional().describe("GOV length"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setVideoProfile(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("add_video_profile", {
+  description: "Add a new video profile.",
+  inputSchema: {
+    channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
+    name: z.string().describe("Profile name"),
+    encodingType: z.string().describe("Encoding type (H264, H265, MJPEG)"),
+    resolution: z.string().describe("Resolution (e.g. 1920x1080)"),
+    frameRate: z.number().describe("Frame rate"),
+    bitrate: z.number().describe("Bitrate in kbps"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await addVideoProfile(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("remove_video_profile", {
+  description: "Remove a video profile.",
+  inputSchema: {
+    channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
+    profile: z.number().describe("Profile number to remove"),
+  },
+  annotations: DESTRUCTIVE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await removeVideoProfile(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+// ── White Balance ───────────────────────────────────────────────
+
+server.registerTool("get_white_balance", {
+  description: "Get white balance mode and manual red/blue levels.",
+  inputSchema: { channel: z.number().optional().default(0).describe("Camera channel (default 0)") },
+  annotations: READ_ONLY,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await getWhiteBalance(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_white_balance", {
+  description: "Set white balance mode and optional manual red/blue levels.",
+  inputSchema: {
+    channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
+    mode: z.string().describe("White balance mode (ATW, Indoor, Outdoor, Manual)"),
+    manualRedLevel: z.number().optional().describe("Manual red level (0-2048)"),
+    manualBlueLevel: z.number().optional().describe("Manual blue level (0-2048)"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setWhiteBalance(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+// ── SSDR ────────────────────────────────────────────────────────
+
+server.registerTool("get_ssdr", {
+  description: "Get SSDR (Samsung Super Dynamic Range) settings.",
+  inputSchema: { channel: z.number().optional().default(0).describe("Camera channel (default 0)") },
+  annotations: READ_ONLY,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await getSsdr(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_ssdr", {
+  description: "Configure SSDR enable/disable, level, and dynamic range.",
+  inputSchema: {
+    channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
+    enable: z.boolean().optional().describe("Enable/disable SSDR"),
+    level: z.number().optional().describe("SSDR level"),
+    dynamicRange: z.string().optional().describe("Dynamic range (Narrow, Wide)"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setSsdr(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+// ── Privacy Mask ────────────────────────────────────────────────
+
+server.registerTool("get_privacy_mask", {
+  description: "Get privacy mask status and color.",
+  inputSchema: { channel: z.number().optional().default(0).describe("Camera channel (default 0)") },
+  annotations: READ_ONLY,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await getPrivacyMask(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_privacy_mask", {
+  description: "Enable/disable privacy mask and set color.",
+  inputSchema: {
+    channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
+    enable: z.boolean().optional().describe("Enable/disable privacy mask"),
+    maskColor: z.string().optional().describe("Mask color (Gray, White, Black, Red, Blue, Green)"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setPrivacyMask(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+// ── Event Detection ─────────────────────────────────────────────
+
+server.registerTool("get_tampering_detection", {
+  description: "Get tampering detection settings.",
+  inputSchema: { channel: z.number().optional().default(0).describe("Camera channel (default 0)") },
+  annotations: READ_ONLY,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await getTamperingDetection(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_tampering_detection", {
+  description: "Configure tampering detection enable, sensitivity, threshold, duration.",
+  inputSchema: {
+    channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
+    enable: z.boolean().optional().describe("Enable/disable tampering detection"),
+    sensitivityLevel: z.number().optional().describe("Sensitivity level (0-100)"),
+    thresholdLevel: z.number().optional().describe("Threshold level (0-100)"),
+    duration: z.number().optional().describe("Duration in seconds"),
+    darknessDetection: z.boolean().optional().describe("Enable darkness detection"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setTamperingDetection(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("get_defocus_detection", {
+  description: "Get defocus detection settings.",
+  inputSchema: { channel: z.number().optional().default(0).describe("Camera channel (default 0)") },
+  annotations: READ_ONLY,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await getDefocusDetection(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_defocus_detection", {
+  description: "Configure defocus detection enable, sensitivity, threshold, duration.",
+  inputSchema: {
+    channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
+    enable: z.boolean().optional().describe("Enable/disable defocus detection"),
+    sensitivity: z.number().optional().describe("Sensitivity level (0-100)"),
+    thresholdLevel: z.number().optional().describe("Threshold level (0-100)"),
+    duration: z.number().optional().describe("Duration in seconds"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setDefocusDetection(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+// ── Event Rules ─────────────────────────────────────────────────
+
+server.registerTool("get_event_rules", {
+  description: "List all event rules with name, source, enabled status, and schedule.",
+  annotations: READ_ONLY,
+}, async () => {
+  try { return { content: [{ type: "text", text: await getEventRules() }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_event_rule", {
+  description: "Enable or disable an event rule.",
+  inputSchema: {
+    ruleIndex: z.number().describe("Rule index number"),
+    enable: z.boolean().optional().describe("Enable/disable the rule"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setEventRule(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+// ── Users / Security ────────────────────────────────────────────
+
+server.registerTool("get_users", {
+  description: "List camera users with admin and enabled status.",
+  annotations: READ_ONLY,
+}, async () => {
+  try { return { content: [{ type: "text", text: await getUsers() }] }; }
+  catch (err) { return toolError(err); }
+});
+
+// ── Storage / Recording ─────────────────────────────────────────
+
+server.registerTool("get_storage_config", {
+  description: "Get storage/recording configuration (enable, overwrite, auto-delete).",
+  annotations: READ_ONLY,
+}, async () => {
+  try { return { content: [{ type: "text", text: await getStorageConfig() }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_storage_config", {
+  description: "Configure storage settings: enable, overwrite, auto-delete.",
+  inputSchema: {
+    enable: z.boolean().optional().describe("Enable/disable storage"),
+    overwrite: z.boolean().optional().describe("Enable overwrite when full"),
+    autoDeleteEnable: z.boolean().optional().describe("Enable auto delete"),
+    autoDeleteDays: z.number().optional().describe("Auto delete after N days"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setStorageConfig(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+// ── Network Config ──────────────────────────────────────────────
+
+server.registerTool("get_network_config", {
+  description: "Get comprehensive network config: IP, gateway, hostname, ports.",
+  annotations: READ_ONLY,
+}, async () => {
+  try { return { content: [{ type: "text", text: await getNetworkConfig() }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("set_network_config", {
+  description: "Update network interface: IPv4 type, address, subnet, gateway, hostname.",
+  inputSchema: {
+    ipv4Type: z.string().optional().describe("IPv4 type (DHCP, Static)"),
+    ipv4Address: z.string().optional().describe("IPv4 address"),
+    ipv4SubnetMask: z.string().optional().describe("Subnet mask"),
+    ipv4Gateway: z.string().optional().describe("Default gateway"),
+    hostname: z.string().optional().describe("Hostname"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await setNetworkConfig(args) }] }; }
+  catch (err) { return toolError(err); }
 });
 
 // ── Start ───────────────────────────────────────────────────────

@@ -15,25 +15,46 @@ You MUST call `connect_camera` with host, username, and password before using an
 ### Read-only tools (safe, no side effects)
 - `get_device_info` — model, serial, firmware, MAC, video profiles
 - `get_snapshot` — live JPEG image (default resized to 1280px wide)
+- `get_video_profiles` — all video profiles with encoding, resolution, FPS, bitrate, codec settings
 - `get_image_settings` — brightness, sharpness, white balance, exposure, SSDR, flip, IR
+- `get_white_balance` — white balance mode and manual red/blue levels
+- `get_ssdr` — SSDR (Samsung Super Dynamic Range) enable, level, dynamic range
+- `get_privacy_mask` — privacy mask status and color
 - `get_overlay` — title/time overlay configuration
 - `get_osd_list` — multiline on-screen display entries
 - `get_datetime` — time, timezone, DST, NTP servers
+- `get_tampering_detection` — tampering detection enable, sensitivity, threshold, duration
+- `get_defocus_detection` — defocus detection enable, sensitivity, threshold, duration
+- `get_event_rules` — all event rules with name, source, enabled, schedule
 - `get_network_info` — MAC, link status, DNS
+- `get_network_config` — full network config: IP, gateway, hostname, HTTP/HTTPS/RTSP ports
+- `get_users` — camera users with admin and enabled status
+- `get_storage_config` — storage enable, overwrite, auto-delete settings
 - `get_logs` — system/access/event logs
 
 ### Write tools (modify camera settings, idempotent)
+- `set_video_profile` — update profile encoding, resolution, FPS, bitrate, codec settings
+- `add_video_profile` — add a new video profile
 - `set_image_settings` — brightness (0-100), sharpness, gamma, saturation (0-100)
 - `set_flip` — horizontalFlip (bool), verticalFlip (bool), rotate (Off/90/180/270)
 - `set_ir_led` — mode (Auto/Off/On)
 - `set_focus` — mode (SimpleAutoFocus/ManualFocus)
+- `set_white_balance` — mode (ATW/Indoor/Outdoor/Manual), manual red/blue levels
+- `set_ssdr` — enable, level, dynamic range (Narrow/Wide)
+- `set_privacy_mask` — enable, mask color
 - `set_overlay` — title text, time format, font size, positions
 - `set_osd` — add/update OSD entry by index (1-8) with type, text, color, size, position
 - `set_ntp` — comma-separated NTP server list
 - `set_datetime` — manual date/time (disables NTP)
+- `set_tampering_detection` — enable, sensitivity, threshold, duration, darkness detection
+- `set_defocus_detection` — enable, sensitivity, threshold, duration
+- `set_event_rule` — enable/disable event rule by index
+- `set_network_config` — IPv4 type, address, subnet, gateway, hostname
+- `set_storage_config` — enable, overwrite, auto-delete, auto-delete days
 
 ### Destructive tools (use with caution)
 - `remove_osd` — permanently deletes an OSD entry by index
+- `remove_video_profile` — permanently deletes a video profile
 - `reboot_camera` — reboots the camera (~60 second downtime)
 
 ## Parameter conventions
@@ -43,20 +64,28 @@ You MUST call `connect_camera` with host, username, and password before using an
 - Position values (X/Y) range from 0-9 representing grid positions.
 - Font sizes are: Small, Medium, Large.
 - OSD colors: White, Red, Blue, Green, Yellow, Cyan, Magenta, Black.
+- White balance modes: ATW, Indoor, Outdoor, Manual.
+- SSDR dynamic range: Narrow, Wide.
 
 ## Common workflows
 
 ### Inspect a camera
 1. `connect_camera` → 2. `get_device_info` → 3. `get_image_settings` → 4. `get_snapshot`
 
+### Manage video profiles
+1. `connect_camera` → 2. `get_video_profiles` → 3. `set_video_profile` to change resolution/bitrate → 4. `get_video_profiles` to confirm
+
 ### Add a text overlay
 1. `connect_camera` → 2. `set_overlay` with titleEnable=true, title="Building A - Lobby" → 3. `get_snapshot` to verify
 
-### Add custom OSD text
-1. `connect_camera` → 2. `set_osd` with index=1, enable=true, osdType="Text", text="RESTRICTED AREA", osdColor="Red", fontSize="Large" → 3. `get_snapshot` to verify
-
 ### Configure NTP
 1. `connect_camera` → 2. `set_ntp` with servers="pool.ntp.org,time.nist.gov" → 3. `get_datetime` to confirm
+
+### Enable tampering detection
+1. `connect_camera` → 2. `set_tampering_detection` with enable=true, sensitivityLevel=80 → 3. `get_tampering_detection` to verify
+
+### Review event rules
+1. `connect_camera` → 2. `get_event_rules` → 3. `set_event_rule` with ruleIndex=N, enable=true/false
 
 ## Error handling
 

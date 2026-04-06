@@ -1,6 +1,6 @@
 {
   "name": "@hemla/hanwha-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for configuring Hanwha Vision IP cameras via SUNAPI",
   "type": "module",
   "main": "dist/index.js",
@@ -11,6 +11,9 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "prepublishOnly": "npm run build"
   },
   "files": [
@@ -40,7 +43,9 @@
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
+    "@vitest/coverage-v8": "^4.1.2",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   }
 }
