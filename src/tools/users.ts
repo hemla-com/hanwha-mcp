@@ -21,15 +21,15 @@ export async function getUsers(): Promise<string> {
     return "No users found.";
   }
 
-  for (const [key, value] of userEntries) {
+  for (const [, value] of userEntries) {
     const parts = value.split("/");
     const username = parts[0] ?? "unknown";
-    const admin = parts[2] === "True" ? "Yes" : "No";
-    const enabled = parts[3] === "True" ? "Yes" : "No";
+    const enabled = parts[2] === "True" ? "Yes" : "No";
+    const videoAccess = parts[3] === "True" ? "Yes" : "No";
 
     lines.push(`### ${username}`);
-    lines.push(`- Admin: ${admin}`);
     lines.push(`- Enabled: ${enabled}`);
+    lines.push(`- Video Profile Access: ${videoAccess}`);
     lines.push("");
   }
 
@@ -39,55 +39,51 @@ export async function getUsers(): Promise<string> {
 export async function createUser(input: {
   username: string;
   password: string;
-  role?: string;
+  enabled?: boolean;
 }): Promise<string> {
   const client = getActiveClient();
-  const role = input.role ?? "viewer";
-
-  const levelMap: Record<string, string> = {
-    admin: "Admin",
-    user: "User",
-    viewer: "Viewer",
-  };
-  const userLevel = levelMap[role] ?? "Viewer";
-
-  await client.request("security.cgi", "users", "add", {
-    Username: input.username,
+  const params: Record<string, string> = {
+    UserID: input.username,
     Password: input.password,
-    UserLevel: userLevel,
-  });
+  };
+  if (input.enabled !== false) params.Enable = "True";
 
-  return `User "${input.username}" created with role ${userLevel}`;
+  const result = await client.request("security.cgi", "users", "add", params);
+  const index = result["Index"];
+  return `User "${input.username}" created${index ? ` at slot ${index}` : ""} (enabled=${input.enabled !== false})`;
 }
 
 export async function updateUser(input: {
   username: string;
   password?: string;
-  role?: string;
+  enabled?: boolean;
 }): Promise<string> {
   const client = getActiveClient();
-  const params: Record<string, string> = {
-    Username: input.username,
+
+  const data = await client.request("security.cgi", "users", "view");
+  const existing = Object.values(data).find((v) => v.startsWith(input.username + "/"));
+  if (!existing) throw new Error(`User "${input.username}" not found`);
+
+  const parts = existing.split("/");
+  const oldEnabled = parts[2] === "True";
+
+  await client.request("security.cgi", "users", "remove", { UserID: input.username });
+
+  const addParams: Record<string, string> = {
+    UserID: input.username,
+    Password: input.password ?? "",
   };
+  const enable = input.enabled ?? oldEnabled;
+  if (enable) addParams.Enable = "True";
 
-  if (input.password) params.Password = input.password;
-  if (input.role) {
-    const levelMap: Record<string, string> = {
-      admin: "Admin",
-      user: "User",
-      viewer: "Viewer",
-    };
-    params.UserLevel = levelMap[input.role] ?? "Viewer";
-  }
-
-  await client.request("security.cgi", "users", "set", params);
+  await client.request("security.cgi", "users", "add", addParams);
   return `User "${input.username}" updated`;
 }
 
 export async function removeUser(input: { username: string }): Promise<string> {
   const client = getActiveClient();
   await client.request("security.cgi", "users", "remove", {
-    Username: input.username,
+    UserID: input.username,
   });
   return `User "${input.username}" removed`;
 }

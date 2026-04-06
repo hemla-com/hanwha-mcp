@@ -538,7 +538,7 @@ server.registerTool("set_event_rule", {
 // ── Users / Security ────────────────────────────────────────────
 
 server.registerTool("get_users", {
-  description: "List camera users with admin and enabled status.",
+  description: "List camera users with enabled status. Hanwha cameras have a fixed number of user slots.",
   annotations: READ_ONLY,
 }, async () => {
   try { return { content: [{ type: "text", text: await getUsers() }] }; }
@@ -546,11 +546,11 @@ server.registerTool("get_users", {
 });
 
 server.registerTool("create_user", {
-  description: "Create a new user account on the camera.",
+  description: "Create a new user account on the camera. Requires a free user slot (camera has a fixed number of slots).",
   inputSchema: {
     username: z.string().describe("Username for the new account"),
     password: z.string().describe("Password for the new account"),
-    role: z.enum(["admin", "user", "viewer"]).optional().default("viewer").describe("User role (admin, user, viewer)"),
+    enabled: z.boolean().optional().default(true).describe("Enable the user account (default true)"),
   },
   annotations: SAFE_WRITE,
 }, async (args) => {
@@ -559,11 +559,11 @@ server.registerTool("create_user", {
 });
 
 server.registerTool("update_user", {
-  description: "Update an existing user's password or role.",
+  description: "Update an existing user's password or enabled status. Internally removes and re-adds the user.",
   inputSchema: {
     username: z.string().describe("Username to update"),
     password: z.string().optional().describe("New password"),
-    role: z.enum(["admin", "user", "viewer"]).optional().describe("New role"),
+    enabled: z.boolean().optional().describe("Enable or disable the account"),
   },
   annotations: SAFE_WRITE,
 }, async (args) => {

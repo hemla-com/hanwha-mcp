@@ -12,7 +12,7 @@ function createMockClient() {
 }
 
 beforeEach(() => {
-  vi.restoreAllMocks();
+  mockRequest.mockReset();
   setActiveClient(createMockClient());
 });
 
@@ -20,16 +20,15 @@ describe("getUsers", () => {
   it("returns formatted user list", async () => {
     mockRequest.mockResolvedValue({
       "Users.0": "admin//True/True////",
-      "Users.1": "viewer//False/True////",
+      "Users.1": "viewer//False/False////",
     });
 
     const result = await getUsers();
 
     expect(result).toContain("admin");
     expect(result).toContain("viewer");
-    expect(result).toContain("Admin: Yes");
-    expect(result).toContain("Admin: No");
     expect(result).toContain("Enabled: Yes");
+    expect(result).toContain("Enabled: No");
     expect(mockRequest).toHaveBeenCalledWith("security.cgi", "users", "view");
   });
 
@@ -41,51 +40,52 @@ describe("getUsers", () => {
 });
 
 describe("createUser", () => {
-  it("creates a viewer user by default", async () => {
-    mockRequest.mockResolvedValue({});
+  it("creates an enabled user", async () => {
+    mockRequest.mockResolvedValue({ Index: "5" });
     const result = await createUser({ username: "john", password: "secret" });
     expect(result).toContain("john");
-    expect(result).toContain("Viewer");
+    expect(result).toContain("slot 5");
     expect(mockRequest).toHaveBeenCalledWith("security.cgi", "users", "add", {
-      Username: "john",
+      UserID: "john",
       Password: "secret",
-      UserLevel: "Viewer",
+      Enable: "True",
     });
   });
 
-  it("creates an admin user", async () => {
-    mockRequest.mockResolvedValue({});
-    const result = await createUser({ username: "boss", password: "pass", role: "admin" });
-    expect(result).toContain("boss");
-    expect(result).toContain("Admin");
+  it("creates a disabled user when enabled=false", async () => {
+    mockRequest.mockResolvedValue({ Index: "3" });
+    const result = await createUser({ username: "bob", password: "pass", enabled: false });
+    expect(result).toContain("bob");
     expect(mockRequest).toHaveBeenCalledWith("security.cgi", "users", "add", {
-      Username: "boss",
+      UserID: "bob",
       Password: "pass",
-      UserLevel: "Admin",
     });
   });
 });
 
 describe("updateUser", () => {
-  it("updates password", async () => {
-    mockRequest.mockResolvedValue({});
+  it("removes and re-adds user with new password", async () => {
+    mockRequest
+      .mockResolvedValueOnce({ "Users.1": "john//True/False////" })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ Index: "1" });
+
     const result = await updateUser({ username: "john", password: "newpass" });
     expect(result).toContain("john");
     expect(result).toContain("updated");
-    expect(mockRequest).toHaveBeenCalledWith("security.cgi", "users", "set", {
-      Username: "john",
+
+    expect(mockRequest).toHaveBeenNthCalledWith(1, "security.cgi", "users", "view");
+    expect(mockRequest).toHaveBeenNthCalledWith(2, "security.cgi", "users", "remove", { UserID: "john" });
+    expect(mockRequest).toHaveBeenNthCalledWith(3, "security.cgi", "users", "add", {
+      UserID: "john",
       Password: "newpass",
+      Enable: "True",
     });
   });
 
-  it("updates role", async () => {
+  it("throws when user not found", async () => {
     mockRequest.mockResolvedValue({});
-    const result = await updateUser({ username: "john", role: "user" });
-    expect(result).toContain("john");
-    expect(mockRequest).toHaveBeenCalledWith("security.cgi", "users", "set", {
-      Username: "john",
-      UserLevel: "User",
-    });
+    await expect(updateUser({ username: "nonexistent" })).rejects.toThrow("not found");
   });
 });
 
@@ -96,7 +96,7 @@ describe("removeUser", () => {
     expect(result).toContain("john");
     expect(result).toContain("removed");
     expect(mockRequest).toHaveBeenCalledWith("security.cgi", "users", "remove", {
-      Username: "john",
+      UserID: "john",
     });
   });
 });

@@ -31,6 +31,17 @@ export class SunapiClient {
     }
 
     const text = await res.text();
+    const firstLine = text.trim().split(/\r?\n/)[0]?.trim();
+    if (firstLine === "NG") {
+      const lines = text.split(/\r?\n/).map((l: string) => l.trim()).filter(Boolean);
+      let code = "unknown";
+      let details = "unknown error";
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith("Error Code:")) code = lines[i].slice(11).trim() || code;
+        if (lines[i].startsWith("Error Details:")) details = lines[i + 1]?.trim() || details;
+      }
+      throw new Error(`SUNAPI ${cgi}/${msubmenu}/${action} error ${code}: ${details}`);
+    }
     return SunapiClient.parseKeyValue(text);
   }
 
