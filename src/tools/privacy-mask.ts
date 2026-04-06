@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getActiveClient } from "./connect.js";
+import { SunapiClient } from "../sunapi/client.js";
 
 export const getPrivacyMaskSchema = z.object({
   channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
@@ -39,7 +40,7 @@ export async function setPrivacyMask(input: z.infer<typeof setPrivacyMaskSchema>
 
   const params: Record<string, string> = { Channel: ch };
 
-  if (input.enable !== undefined) params["Enable"] = String(input.enable);
+  if (input.enable !== undefined) params["Enable"] = SunapiClient.toBool(input.enable);
   if (input.maskColor !== undefined) params["CommonMaskColor"] = input.maskColor;
 
   await client.request("image.cgi", "privacy", "set", params);

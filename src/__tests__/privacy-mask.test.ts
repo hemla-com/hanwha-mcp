@@ -37,7 +37,7 @@ describe("setPrivacyMask", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("image.cgi", "privacy", "set", {
       Channel: "0",
-      Enable: "true",
+      Enable: "True",
       CommonMaskColor: "Black",
     });
     expect(result).toContain("Privacy mask updated");
@@ -51,7 +51,7 @@ describe("setPrivacyMask", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("image.cgi", "privacy", "set", {
       Channel: "1",
-      Enable: "false",
+      Enable: "False",
     });
   });
 });

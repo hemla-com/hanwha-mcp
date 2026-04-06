@@ -52,11 +52,11 @@ describe("setTamperingDetection", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("eventsources.cgi", "tamperingdetection", "set", {
       Channel: "0",
-      Enable: "true",
+      Enable: "True",
       SensitivityLevel: "80",
       ThresholdLevel: "50",
       Duration: "10",
-      DarknessDetection: "true",
+      DarknessDetection: "True",
     });
     expect(result).toContain("Tampering detection updated");
   });
@@ -69,7 +69,7 @@ describe("setTamperingDetection", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("eventsources.cgi", "tamperingdetection", "set", {
       Channel: "1",
-      Enable: "false",
+      Enable: "False",
     });
   });
 });
@@ -109,7 +109,7 @@ describe("setDefocusDetection", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("eventsources.cgi", "defocusdetection", "set", {
       Channel: "0",
-      Enable: "true",
+      Enable: "True",
       Sensitivity: "75",
       ThresholdLevel: "40",
       Duration: "5",
@@ -125,7 +125,7 @@ describe("setDefocusDetection", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("eventsources.cgi", "defocusdetection", "set", {
       Channel: "0",
-      Enable: "false",
+      Enable: "False",
     });
   });
 });

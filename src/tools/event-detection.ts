@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getActiveClient } from "./connect.js";
+import { SunapiClient } from "../sunapi/client.js";
 
 export const getTamperingDetectionSchema = z.object({
   channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
@@ -40,11 +41,11 @@ export async function setTamperingDetection(input: z.infer<typeof setTamperingDe
 
   const params: Record<string, string> = { Channel: ch };
 
-  if (input.enable !== undefined) params["Enable"] = String(input.enable);
+  if (input.enable !== undefined) params["Enable"] = SunapiClient.toBool(input.enable);
   if (input.sensitivityLevel !== undefined) params["SensitivityLevel"] = String(input.sensitivityLevel);
   if (input.thresholdLevel !== undefined) params["ThresholdLevel"] = String(input.thresholdLevel);
   if (input.duration !== undefined) params["Duration"] = String(input.duration);
-  if (input.darknessDetection !== undefined) params["DarknessDetection"] = String(input.darknessDetection);
+  if (input.darknessDetection !== undefined) params["DarknessDetection"] = SunapiClient.toBool(input.darknessDetection);
 
   await client.request("eventsources.cgi", "tamperingdetection", "set", params);
 
@@ -92,7 +93,7 @@ export async function setDefocusDetection(input: z.infer<typeof setDefocusDetect
 
   const params: Record<string, string> = { Channel: ch };
 
-  if (input.enable !== undefined) params["Enable"] = String(input.enable);
+  if (input.enable !== undefined) params["Enable"] = SunapiClient.toBool(input.enable);
   if (input.sensitivity !== undefined) params["Sensitivity"] = String(input.sensitivity);
   if (input.thresholdLevel !== undefined) params["ThresholdLevel"] = String(input.thresholdLevel);
   if (input.duration !== undefined) params["Duration"] = String(input.duration);

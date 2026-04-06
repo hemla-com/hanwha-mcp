@@ -48,7 +48,7 @@ describe("setOverlay", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("image.cgi", "overlay", "set", {
       Channel: "0",
-      TitleEnable: "true",
+      TitleEnable: "True",
       Title: "Lobby",
       FontSize: "Large",
     });
@@ -63,7 +63,7 @@ describe("setOverlay", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("image.cgi", "overlay", "set", {
       Channel: "1",
-      TimeEnable: "false",
+      TimeEnable: "False",
     });
   });
 });

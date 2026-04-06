@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getActiveClient } from "./connect.js";
+import { SunapiClient } from "../sunapi/client.js";
 
 export const getImageSettingsSchema = z.object({
   channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
@@ -105,8 +106,8 @@ export async function setFlip(input: z.infer<typeof setFlipSchema>): Promise<str
   const client = getActiveClient();
   const params: Record<string, string> = { Channel: String(input.channel) };
 
-  if (input.horizontalFlip !== undefined) params["HorizontalFlipEnable"] = String(input.horizontalFlip);
-  if (input.verticalFlip !== undefined) params["VerticalFlipEnable"] = String(input.verticalFlip);
+  if (input.horizontalFlip !== undefined) params["HorizontalFlipEnable"] = SunapiClient.toBool(input.horizontalFlip);
+  if (input.verticalFlip !== undefined) params["VerticalFlipEnable"] = SunapiClient.toBool(input.verticalFlip);
   if (input.rotate !== undefined) params["Rotate"] = input.rotate;
 
   await client.request("image.cgi", "flip", "set", params);

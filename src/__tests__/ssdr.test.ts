@@ -40,7 +40,7 @@ describe("setSsdr", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("image.cgi", "ssdr", "set", {
       Channel: "0",
-      Enable: "true",
+      Enable: "True",
       Level: "15",
       DynamicRange: "Wide",
     });
@@ -55,7 +55,7 @@ describe("setSsdr", () => {
 
     expect(mockRequest).toHaveBeenCalledWith("image.cgi", "ssdr", "set", {
       Channel: "1",
-      Enable: "false",
+      Enable: "False",
     });
   });
 });

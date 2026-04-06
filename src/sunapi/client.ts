@@ -79,6 +79,10 @@ export class SunapiClient {
     return url.toString();
   }
 
+  static toBool(value: boolean): string {
+    return value ? "True" : "False";
+  }
+
   static parseKeyValue(text: string): Record<string, string> {
     const result: Record<string, string> = {};
     for (const line of text.split("\n")) {

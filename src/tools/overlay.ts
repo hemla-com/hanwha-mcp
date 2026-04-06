@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getActiveClient } from "./connect.js";
+import { SunapiClient } from "../sunapi/client.js";
 
 export const getOverlaySchema = z.object({
   channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
@@ -49,13 +50,13 @@ export async function setOverlay(input: z.infer<typeof setOverlaySchema>): Promi
   const client = getActiveClient();
   const params: Record<string, string> = { Channel: String(input.channel) };
 
-  if (input.titleEnable !== undefined) params["TitleEnable"] = String(input.titleEnable);
+  if (input.titleEnable !== undefined) params["TitleEnable"] = SunapiClient.toBool(input.titleEnable);
   if (input.title !== undefined) params["Title"] = input.title;
   if (input.titlePositionX !== undefined) params["TitlePositionX"] = String(input.titlePositionX);
   if (input.titlePositionY !== undefined) params["TitlePositionY"] = String(input.titlePositionY);
-  if (input.timeEnable !== undefined) params["TimeEnable"] = String(input.timeEnable);
+  if (input.timeEnable !== undefined) params["TimeEnable"] = SunapiClient.toBool(input.timeEnable);
   if (input.timeFormat !== undefined) params["TimeFormat"] = input.timeFormat;
-  if (input.weekdayEnable !== undefined) params["WeekdayEnable"] = String(input.weekdayEnable);
+  if (input.weekdayEnable !== undefined) params["WeekdayEnable"] = SunapiClient.toBool(input.weekdayEnable);
   if (input.fontSize !== undefined) params["FontSize"] = input.fontSize;
 
   await client.request("image.cgi", "overlay", "set", params);
@@ -134,7 +135,7 @@ export async function setOsd(input: z.infer<typeof setOsdSchema>): Promise<strin
     Index: String(input.index),
   };
 
-  if (input.enable !== undefined) params["Enable"] = String(input.enable);
+  if (input.enable !== undefined) params["Enable"] = SunapiClient.toBool(input.enable);
   if (input.osdType !== undefined) params["OSDType"] = input.osdType;
   if (input.text !== undefined) params["OSD"] = input.text;
   if (input.positionX !== undefined) params["PositionX"] = String(input.positionX);
@@ -143,7 +144,11 @@ export async function setOsd(input: z.infer<typeof setOsdSchema>): Promise<strin
   if (input.osdColor !== undefined) params["OSDColor"] = input.osdColor;
   if (input.transparency !== undefined) params["Transparency"] = input.transparency;
 
-  await client.request("image.cgi", "multilineosd", "add/update", params);
+  await client.request("image.cgi", "multilineosd", "add", {
+    Channel: String(input.channel),
+    Index: String(input.index),
+  }).catch(() => {});
+  await client.request("image.cgi", "multilineosd", "update", params);
 
   return `OSD index ${input.index} updated.`;
 }

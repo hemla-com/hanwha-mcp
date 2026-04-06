@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getActiveClient } from "./connect.js";
+import { SunapiClient } from "../sunapi/client.js";
 
 export const getSsdrSchema = z.object({
   channel: z.number().optional().default(0).describe("Camera channel (default 0)"),
@@ -41,7 +42,7 @@ export async function setSsdr(input: z.infer<typeof setSsdrSchema>): Promise<str
 
   const params: Record<string, string> = { Channel: ch };
 
-  if (input.enable !== undefined) params["Enable"] = String(input.enable);
+  if (input.enable !== undefined) params["Enable"] = SunapiClient.toBool(input.enable);
   if (input.level !== undefined) params["Level"] = String(input.level);
   if (input.dynamicRange !== undefined) params["DynamicRange"] = input.dynamicRange;
 

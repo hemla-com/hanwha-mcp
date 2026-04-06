@@ -41,9 +41,9 @@ describe("setStorageConfig", () => {
     });
 
     expect(mockRequest).toHaveBeenCalledWith("recording.cgi", "storage", "set", {
-      Enable: "true",
-      OverWrite: "true",
-      AutoDeleteEnable: "true",
+      Enable: "True",
+      OverWrite: "True",
+      AutoDeleteEnable: "True",
       AutoDeleteDays: "90",
     });
     expect(result).toContain("Storage config updated");
@@ -56,7 +56,7 @@ describe("setStorageConfig", () => {
     await setStorageConfig({ enable: false });
 
     expect(mockRequest).toHaveBeenCalledWith("recording.cgi", "storage", "set", {
-      Enable: "false",
+      Enable: "False",
     });
   });
 });

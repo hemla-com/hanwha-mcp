@@ -59,7 +59,7 @@ describe("setOSD", () => {
       channel: 0,
       index: 1,
       enable: true,
-      osdType: "Custom",
+      osdType: "Title",
       text: "Hello",
       positionX: 2,
       positionY: 3,
@@ -68,11 +68,15 @@ describe("setOSD", () => {
       transparency: "Off",
     });
 
-    expect(mockRequest).toHaveBeenCalledWith("image.cgi", "multilineosd", "add/update", {
+    expect(mockRequest).toHaveBeenNthCalledWith(1, "image.cgi", "multilineosd", "add", {
       Channel: "0",
       Index: "1",
-      Enable: "true",
-      OSDType: "Custom",
+    });
+    expect(mockRequest).toHaveBeenNthCalledWith(2, "image.cgi", "multilineosd", "update", {
+      Channel: "0",
+      Index: "1",
+      Enable: "True",
+      OSDType: "Title",
       OSD: "Hello",
       PositionX: "2",
       PositionY: "3",
@@ -89,10 +93,14 @@ describe("setOSD", () => {
 
     await setOSD({ channel: 0, index: 2, enable: false });
 
-    expect(mockRequest).toHaveBeenCalledWith("image.cgi", "multilineosd", "add/update", {
+    expect(mockRequest).toHaveBeenNthCalledWith(1, "image.cgi", "multilineosd", "add", {
       Channel: "0",
       Index: "2",
-      Enable: "false",
+    });
+    expect(mockRequest).toHaveBeenNthCalledWith(2, "image.cgi", "multilineosd", "update", {
+      Channel: "0",
+      Index: "2",
+      Enable: "False",
     });
   });
 });
