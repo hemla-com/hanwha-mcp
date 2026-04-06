@@ -8,37 +8,20 @@ MCP server for configuring [Hanwha Vision](https://hanwhavision.com) (Wisenet) I
 
 ## Install
 
-### Claude Desktop
-
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
   "mcpServers": {
-    "hanwha-camera": {
+    "Hanwha": {
       "command": "npx",
-      "args": ["-y", "@hemla/hanwha-mcp"]
+      "args": ["-y", "@hemla/hanwha-mcp@0.2.0"]
     }
   }
 }
 ```
 
-### VS Code / Cursor
-
-Add to `.vscode/mcp.json` in your workspace:
-
-```json
-{
-  "servers": {
-    "hanwha-camera": {
-      "command": "npx",
-      "args": ["-y", "@hemla/hanwha-mcp"]
-    }
-  }
-}
-```
-
-Restart the application after adding.
+Restart Claude Desktop after adding.
 
 ## Usage
 
