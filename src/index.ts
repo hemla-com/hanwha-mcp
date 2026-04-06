@@ -17,7 +17,7 @@ import { getSsdr, setSsdr } from "./tools/ssdr.js";
 import { getPrivacyMask, setPrivacyMask } from "./tools/privacy-mask.js";
 import { getTamperingDetection, setTamperingDetection, getDefocusDetection, setDefocusDetection } from "./tools/event-detection.js";
 import { getEventRules, setEventRule } from "./tools/event-rules.js";
-import { getUsers } from "./tools/users.js";
+import { getUsers, createUser, updateUser, removeUser } from "./tools/users.js";
 import { getStorageConfig, setStorageConfig } from "./tools/storage.js";
 import { getNetworkConfig, setNetworkConfig } from "./tools/network-config.js";
 
@@ -542,6 +542,43 @@ server.registerTool("get_users", {
   annotations: READ_ONLY,
 }, async () => {
   try { return { content: [{ type: "text", text: await getUsers() }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("create_user", {
+  description: "Create a new user account on the camera.",
+  inputSchema: {
+    username: z.string().describe("Username for the new account"),
+    password: z.string().describe("Password for the new account"),
+    role: z.enum(["admin", "user", "viewer"]).optional().default("viewer").describe("User role (admin, user, viewer)"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await createUser(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("update_user", {
+  description: "Update an existing user's password or role.",
+  inputSchema: {
+    username: z.string().describe("Username to update"),
+    password: z.string().optional().describe("New password"),
+    role: z.enum(["admin", "user", "viewer"]).optional().describe("New role"),
+  },
+  annotations: SAFE_WRITE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await updateUser(args) }] }; }
+  catch (err) { return toolError(err); }
+});
+
+server.registerTool("remove_user", {
+  description: "Remove a user account from the camera.",
+  inputSchema: {
+    username: z.string().describe("Username to remove"),
+  },
+  annotations: DESTRUCTIVE,
+}, async (args) => {
+  try { return { content: [{ type: "text", text: await removeUser(args) }] }; }
   catch (err) { return toolError(err); }
 });
 

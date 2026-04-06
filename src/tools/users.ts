@@ -35,3 +35,59 @@ export async function getUsers(): Promise<string> {
 
   return lines.join("\n");
 }
+
+export async function createUser(input: {
+  username: string;
+  password: string;
+  role?: string;
+}): Promise<string> {
+  const client = getActiveClient();
+  const role = input.role ?? "viewer";
+
+  const levelMap: Record<string, string> = {
+    admin: "Admin",
+    user: "User",
+    viewer: "Viewer",
+  };
+  const userLevel = levelMap[role] ?? "Viewer";
+
+  await client.request("security.cgi", "users", "add", {
+    Username: input.username,
+    Password: input.password,
+    UserLevel: userLevel,
+  });
+
+  return `User "${input.username}" created with role ${userLevel}`;
+}
+
+export async function updateUser(input: {
+  username: string;
+  password?: string;
+  role?: string;
+}): Promise<string> {
+  const client = getActiveClient();
+  const params: Record<string, string> = {
+    Username: input.username,
+  };
+
+  if (input.password) params.Password = input.password;
+  if (input.role) {
+    const levelMap: Record<string, string> = {
+      admin: "Admin",
+      user: "User",
+      viewer: "Viewer",
+    };
+    params.UserLevel = levelMap[input.role] ?? "Viewer";
+  }
+
+  await client.request("security.cgi", "users", "set", params);
+  return `User "${input.username}" updated`;
+}
+
+export async function removeUser(input: { username: string }): Promise<string> {
+  const client = getActiveClient();
+  await client.request("security.cgi", "users", "remove", {
+    Username: input.username,
+  });
+  return `User "${input.username}" removed`;
+}

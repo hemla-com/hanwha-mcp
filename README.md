@@ -140,6 +140,9 @@ Then interact naturally:
 | Tool | Description | Parameters |
 |---|---|---|
 | `get_users` | List camera users with admin/enabled status | — |
+| `create_user` | Create a new user account | `username`, `password`, `role?` (admin/user/viewer, default viewer) |
+| `update_user` | Update a user's password or role | `username`, `password?`, `role?` |
+| `remove_user` | Remove a user account | `username` |
 
 ### Storage & Recording
 
@@ -155,7 +158,7 @@ Then interact naturally:
 | `get_logs` | System, access, or event logs | `type` (system/access/event) |
 | `reboot_camera` | Reboot the camera | — |
 
-All read-only tools are annotated for automatic approval. Write tools are marked as non-destructive and idempotent. Only `reboot_camera`, `remove_osd`, and `remove_video_profile` require confirmation.
+All read-only tools are annotated for automatic approval. Write tools are marked as non-destructive and idempotent. Only `reboot_camera`, `remove_osd`, `remove_video_profile`, and `remove_user` require confirmation.
 
 ## Compatibility
 

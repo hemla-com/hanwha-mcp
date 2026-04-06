@@ -51,10 +51,13 @@ You MUST call `connect_camera` with host, username, and password before using an
 - `set_event_rule` — enable/disable event rule by index
 - `set_network_config` — IPv4 type, address, subnet, gateway, hostname
 - `set_storage_config` — enable, overwrite, auto-delete, auto-delete days
+- `create_user` — create a new user with role (admin/user/viewer)
+- `update_user` — change password or role of an existing user
 
 ### Destructive tools (use with caution)
 - `remove_osd` — permanently deletes an OSD entry by index
 - `remove_video_profile` — permanently deletes a video profile
+- `remove_user` — permanently deletes a user account
 - `reboot_camera` — reboots the camera (~60 second downtime)
 
 ## Parameter conventions
