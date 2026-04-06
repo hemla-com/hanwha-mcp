@@ -15,7 +15,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "Hanwha": {
       "command": "npx",
-      "args": ["-y", "@hemla/hanwha-mcp@0.2.0"]
+      "args": ["-y", "@hemla/hanwha-mcp@0.3.0"]
     }
   }
 }
