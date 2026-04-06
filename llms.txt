@@ -51,8 +51,8 @@ You MUST call `connect_camera` with host, username, and password before using an
 - `set_event_rule` — enable/disable event rule by index
 - `set_network_config` — IPv4 type, address, subnet, gateway, hostname
 - `set_storage_config` — enable, overwrite, auto-delete, auto-delete days
-- `create_user` — create a new user with role (admin/user/viewer)
-- `update_user` — change password or role of an existing user
+- `create_user` — create a new user with optional enabled flag (fixed slot system, max 10 users)
+- `update_user` — change password or enabled status of an existing user (implemented as remove + re-add)
 
 ### Destructive tools (use with caution)
 - `remove_osd` — permanently deletes an OSD entry by index

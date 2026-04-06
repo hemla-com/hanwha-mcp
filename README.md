@@ -15,7 +15,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "Hanwha": {
       "command": "npx",
-      "args": ["-y", "@hemla/hanwha-mcp@0.3.0"]
+      "args": ["-y", "@hemla/hanwha-mcp@0.3.1"]
     }
   }
 }
@@ -140,8 +140,8 @@ Then interact naturally:
 | Tool | Description | Parameters |
 |---|---|---|
 | `get_users` | List camera users with admin/enabled status | — |
-| `create_user` | Create a new user account | `username`, `password`, `role?` (admin/user/viewer, default viewer) |
-| `update_user` | Update a user's password or role | `username`, `password?`, `role?` |
+| `create_user` | Create a new user account (fixed slot system, max 10 users) | `username`, `password`, `enabled?` (default true) |
+| `update_user` | Update a user's password or enabled status | `username`, `password?`, `enabled?` |
 | `remove_user` | Remove a user account | `username` |
 
 ### Storage & Recording
