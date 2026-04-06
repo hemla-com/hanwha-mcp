@@ -2,7 +2,6 @@
 
 [![npm](https://img.shields.io/npm/v/@hemla/hanwha-mcp)](https://www.npmjs.com/package/@hemla/hanwha-mcp)
 [![CI](https://github.com/hemla-com/hanwha-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/hemla-com/hanwha-mcp/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/hemla-com/hanwha-mcp/graph/badge.svg)](https://codecov.io/gh/hemla-com/hanwha-mcp)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 
 MCP server for configuring [Hanwha Vision](https://hanwhavision.com) (Wisenet) IP cameras. Connects via SUNAPI and exposes 30+ tools for device info, live snapshots, video profiles, image tuning, overlays, OSD, NTP, network, events, security, and storage management.
